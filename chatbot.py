@@ -19,10 +19,10 @@ model = ChatGroq(model="llama-3.1-8b-instant")
 ytt_api = YouTubeTranscriptApi()
 
 #need to overwork
-video_id = 'Gfr50f6ZBvo'
-#question = 'is the topic of nuclear fusion discussed in this video? if yes then what was discussed?'
-question='generate notes of this video'
-initial_state = {'video_id':video_id,'question':question}
+# video_id = 'Gfr50f6ZBvo'
+# #question = 'is the topic of nuclear fusion discussed in this video? if yes then what was discussed?'
+# question='generate notes of this video'
+# initial_state = {'video_id':video_id,'question':question}
 
 
 
