@@ -6,7 +6,6 @@ async function getUserId() {
     await chrome.storage.local.set({ user_id: newId });
     return newId;
   }
-
   return user_id.user_id;
 }
 function getYouTubeVideoId(url) {
@@ -19,16 +18,16 @@ async function getCurrentTabUrl() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   return tab.url;
 }
-const url = await getCurrentTabUrl();
-const videoId = getYouTubeVideoId(url);
 
 document.getElementById("send").addEventListener("click", async () => {
   const question = document.getElementById("input").value;
+  console.log("Sending request...");
   const answer = document.getElementById("output");
-
+  const url = await getCurrentTabUrl();
   const user_id = await getUserId();
+  const videoId = getYouTubeVideoId(url);
 
-  const res = await fetch("http://localhost:8000/chat", {
+  const res = await fetch("http://127.0.0.1:8000/chat", {
   method: "POST",
   headers: {
     "Content-Type": "application/json"

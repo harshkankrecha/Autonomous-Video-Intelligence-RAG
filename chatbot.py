@@ -18,11 +18,10 @@ model = ChatGroq(model="llama-3.1-8b-instant")
 
 ytt_api = YouTubeTranscriptApi()
 
-#need to overwork
-# video_id = 'Gfr50f6ZBvo'
-# #question = 'is the topic of nuclear fusion discussed in this video? if yes then what was discussed?'
-# question='generate notes of this video'
-# initial_state = {'video_id':video_id,'question':question}
+#video_id = 'Gfr50f6ZBvo'
+#question = 'is the topic of nuclear fusion discussed in this video? if yes then what was discussed?'
+#question='generate notes of this video'
+#initial_state = {'video_id':video_id,'question':question}
 
 
 
@@ -33,17 +32,17 @@ class ChatbotState(TypedDict):
     context:str
     question:str
     answer:str
-    user_intent:Literal['QA','TimestampFinder','NotesGeneration']
+    user_intent:Literal['QA','NotesGeneration']
 
 class IntentClassificationSchema(BaseModel):
-    user_intent:Literal['QA','TimestampFinder','NotesGeneration'] = Field(description='Identify the intent of user from the query.')
+    user_intent:Literal['QA','NotesGeneration'] = Field(description='Identify the intent of user text from the query.')
 
 strucured_model = model.with_structured_output(IntentClassificationSchema)
 
 def generate_transcript(state:ChatbotState):
     transcript = ''
     try:
-        fetched_transcript = ytt_api.fetch(video_id,languages=['en'])
+        fetched_transcript = ytt_api.fetch(state['video_id'],languages=['en'])
         for snippet in fetched_transcript:
             transcript+=''.join(snippet.text)
         #print(transcript)
@@ -62,7 +61,7 @@ def identify_user_intent(state:ChatbotState):
         SystemMessage(content="You are a great intent evaluator. You are unbiased by opinions."),
         HumanMessage(content=f"""Evaluate this {question}. Identify what user wants from this question.
         ### Respond ONLY in structured format:
-        - user_intent: 'QA' or 'TimestampFinder'or 'NotesGeneration'
+        - user_intent: 'QA' or 'NotesGeneration'
         If the intent is none of the above then return QA """)]
     output = strucured_model.invoke(messages)
     return {'user_intent':output.user_intent}
@@ -93,9 +92,7 @@ def generate_answer(state:ChatbotState):
     question = state['question']
     prompt = PromptTemplate(template=f"You are a helpful assistant. Answer only from the provided transcript context.If the context is not enough just say don't know: {context}. Question:{question}",input_variables=['context','question'])
     query = prompt.invoke({"context":context,'question':question})
-    #print(context)
     response = model.invoke(query)
-    #print(final_prompt)
     answer = response.content
     return {'answer':answer}  
 
