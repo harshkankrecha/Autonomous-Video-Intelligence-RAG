@@ -1,16 +1,37 @@
 from fastapi import FastAPI
 from chatbot import build_graph
-from langgraph.checkpoint.postgres import PostgresSaver
 import os
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from psycopg_pool import ConnectionPool
-from langgraph.checkpoint.memory import InMemorySaver
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
+from langgraph.checkpoint.postgres import PostgresSaver
 
 
 load_dotenv()
-app = FastAPI()
+DB_URI = os.getenv('DB_URI')
+chatbot = None
+checkpointer = None
+pool = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global chatbot, checkpointer, pool
+    pool = ConnectionPool(
+        conninfo=DB_URI,
+        min_size=1,
+        max_size=10
+    )
+    checkpointer = PostgresSaver(pool)
+    checkpointer.setup()
+    chatbot = build_graph(checkpointer)
+    print("App started successfully")
+    yield
+    pool.close()
+    print("App shutdown")
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,12 +46,9 @@ class ChatRequest(BaseModel):
     question: str
     video_id: str
 
-checkpointer = InMemorySaver()
-chatbot = build_graph(checkpointer)
-
 @app.post("/chat")
 def chat(request: ChatRequest):
-    thread_id = f"user:{request.user_id}"
+    thread_id = f"{request.user_id}:{request.video_id}"
     config = {
         "configurable": {
             "thread_id": thread_id
