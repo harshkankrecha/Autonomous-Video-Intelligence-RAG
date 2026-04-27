@@ -4,7 +4,7 @@ A **Retrieval-Augmented Generation (RAG)** based chatbot that allows users to ch
 
 Built using **RAG, LangGraph, LangChain, PostgreSQL (PGVector), Supabase, FastAPI, and Groq LLMs (LLaMA 3)**.
 
----
+
 
 # 🚀 Features
 
@@ -17,9 +17,7 @@ Built using **RAG, LangGraph, LangChain, PostgreSQL (PGVector), Supabase, FastAP
 * 🤖 Intent classification (QA vs Notes Generation)
 * 🌐 FastAPI backend for API access
 
----
 
----
 
 # 🧰 Tech Stack
 
@@ -32,9 +30,6 @@ Built using **RAG, LangGraph, LangChain, PostgreSQL (PGVector), Supabase, FastAP
 * **ORM:** SQLAlchemy
 * **State Management:** LangGraph StateGraph
 
----
-
----
 
 # 🧠 Key Components
 
@@ -65,8 +60,3 @@ Built using **RAG, LangGraph, LangChain, PostgreSQL (PGVector), Supabase, FastAP
 * Controls full pipeline execution
 * Handles routing between QA and Notes nodes
 
----
-
-
-
-**Harsh
