@@ -1,4 +1,4 @@
-# 🎥 YouTube Video Chatbot (RAG + LangGraph + PGVector)
+# 🎥 Autonomous Video Intelligence RAG
 
 A **Retrieval-Augmented Generation (RAG)** based chatbot that allows users to chat with YouTube videos. It can generate **QA responses** and **structured notes** from video transcripts using LLMs, vector search, and workflow orchestration.
 
