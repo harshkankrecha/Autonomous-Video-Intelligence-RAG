@@ -15,6 +15,7 @@ chatbot = None
 checkpointer = None
 pool = None
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global chatbot, checkpointer, pool
@@ -59,3 +60,10 @@ def chat(request: ChatRequest):
         config=config
     )
     return result['answer']
+
+@app.get("/history")
+def history(video_id: str, user_id: str):
+    thread_id = f"{user_id}:{video_id}"
+    state = chatbot.get_state(config={"configurable": {"thread_id": thread_id}})
+    history = state.values.get("history", [])
+    return {"history": history[-5:]}

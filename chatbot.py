@@ -41,6 +41,7 @@ class ChatbotState(TypedDict):
     question:str
     answer:str
     user_intent:Literal['QA','NotesGeneration']
+    history: list[dict]
 
 class IntentClassificationSchema(BaseModel):
     user_intent:Literal['QA','NotesGeneration'] = Field(description='Identify the intent of user text from the query.')
@@ -83,7 +84,7 @@ def identify_user_intent(state:ChatbotState):
         HumanMessage(content=f"""Evaluate this {question}. Identify what user wants from this question.
         ### Respond ONLY in structured format:
         - user_intent: 'QA' or 'NotesGeneration' only
-        If the intent is none of the above then return QA""")]
+        If the intent is none of the above then return 'QA'""")]
     output = strucured_model.invoke(messages)
     return {'user_intent':output.user_intent}
 def mark_indexed(video_id):
@@ -139,7 +140,6 @@ def conditional_video_indexing(state: ChatbotState):
 
 
 def generate_context(state:ChatbotState):
-    
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-mpnet-base-v2"
     )
@@ -167,7 +167,12 @@ def generate_notes(state:ChatbotState):
     - Key insights
     """
     notes = model.invoke(prompt).content
-    return {'answer':notes}
+    history = state.get("history", [])
+    history.append({
+        "question": state['question'],
+        "answer": notes
+    })
+    return {'answer':notes,'history':history}
 
 def generate_answer(state:ChatbotState):
     context = state['context']
@@ -176,7 +181,12 @@ def generate_answer(state:ChatbotState):
     query = prompt.invoke({"context":context,'question':question})
     response = model.invoke(query)
     answer = response.content
-    return {'answer':answer}  
+    history = state.get("history", [])
+    history.append({
+        "question": question,
+        "answer": answer
+    })
+    return {'answer':answer,'history':history}  
 
 def router(state:ChatbotState):
     return state['user_intent']
